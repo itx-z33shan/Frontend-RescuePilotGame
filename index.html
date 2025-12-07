@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rescue Pilot</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="simple-bg"></div>
+
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="screen active">
+      <div class="welcome-container">
+        <div class="logo-container">
+          <div class="plane-icon">✈️</div>
+          <h1 class="game-title">RESCUE PILOT</h1>
+          <p class="game-subtitle">Emergency Response Unit</p>
+        </div>
+        <div class="story-box">
+          <h2>📖 Your Mission</h2>
+          <p>
+            Fly across Europe to rescue people from disasters. Complete 6
+            missions to win!
+          </p>
+          <div class="stats-preview">
+            <div class="stat-item">
+              <span class="stat-icon">⛽</span
+              ><span class="stat-label">Fuel</span
+              ><span class="stat-value">2,500 km</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-icon">⭐</span
+              ><span class="stat-label">Trust</span
+              ><span class="stat-value">100</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-icon">🎯</span
+              ><span class="stat-label">Missions</span
+              ><span class="stat-value">6 to win</span>
+            </div>
+          </div>
+        </div>
+        <div class="name-input-container">
+          <label for="player-name">Enter Your Callsign:</label>
+          <input
+            type="text"
+            id="player-name"
+            placeholder="Commander..."
+            maxlength="20"
+          />
+          <button id="start-btn" class="btn-primary">
+            <span class="btn-icon">🚀</span> START
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+      <header class="game-header">
+        <div class="header-left">
+          <div class="pilot-info">
+            <span class="pilot-icon">👨‍✈️</span
+            ><span id="pilot-name-display">Commander</span>
+          </div>
+        </div>
+        <div class="header-center">
+          <h1 class="header-title">RESCUE PILOT</h1>
+        </div>
+        <div class="header-right"></div>
+      </header>
+      <main class="game-main">
+        <section class="dashboard">
+          <div class="status-cards">
+            <div class="status-card fuel-card">
+              <div class="card-header">
+                <span class="card-icon">⛽</span
+                ><span class="card-title">FUEL</span>
+              </div>
+              <div class="fuel-bar-container">
+                <div id="fuel-bar" class="fuel-bar"></div>
+              </div>
+              <div class="fuel-value">
+                <span id="fuel-value">2500</span
+                ><span class="fuel-unit">km</span>
+              </div>
+              <button id="refuel-btn" class="btn-refuel" style="display: none">
+                🔄 Refuel (-20 Trust = +1000km)
+              </button>
+            </div>
+            <div class="status-card reputation-card">
+              <div class="card-header">
+                <span class="card-icon">⭐</span
+                ><span class="card-title">TRUST</span>
+              </div>
+              <span id="reputation-value" class="big-number">100</span>
+              <div class="reputation-bar-container">
+                <div id="reputation-bar" class="reputation-bar"></div>
+              </div>
+            </div>
+            <div class="status-card rescued-card">
+              <div class="card-header">
+                <span class="card-icon">🧑‍🤝‍🧑</span
+                ><span class="card-title">RESCUED</span>
+              </div>
+              <span id="rescued-value" class="big-number">0</span>
+            </div>
+            <div class="status-card missions-card">
+              <div class="card-header">
+                <span class="card-icon">🎯</span
+                ><span class="card-title">MISSIONS</span>
+              </div>
+              <div class="missions-display">
+                <span id="missions-completed">0</span
+                ><span class="missions-separator">/</span
+                ><span id="missions-total">6</span>
+              </div>
+              <div class="missions-label">Completed</div>
+            </div>
+          </div>
+        </section>
+        <section class="location-section">
+          <div class="location-card">
+            <div class="location-header">
+              <span class="location-icon">📍</span
+              ><span class="location-label">CURRENT LOCATION</span>
+            </div>
+            <div class="location-info">
+              <h2 id="current-airport-name">London Heathrow</h2>
+              <span id="current-airport-code" class="airport-code">EGLL</span>
+            </div>
+          </div>
+        </section>
+        <section class="map-section">
+          <div class="map-header">
+            <h2>🗺️ Flight Map</h2>
+            <p>Click on an airport to fly there</p>
+          </div>
+          <div id="game-map" class="game-map"></div>
+          <div class="map-legend">
+            <div class="legend-item">
+              <span class="legend-marker current"></span><span>You</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-marker mission"></span><span>Mission</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-marker in-range"></span><span>In Range</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-marker out-range"></span
+              ><span>Out of Range</span>
+            </div>
+          </div>
+        </section>
+        <section class="missions-section">
+          <div class="missions-header"><h2>📋 Missions</h2></div>
+          <div id="missions-list" class="missions-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="mission-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header danger">
+          <span class="modal-icon">🚨</span>
+          <h2>MISSION</h2>
+        </div>
+        <div class="modal-body">
+          <div class="disaster-info">
+            <span id="disaster-icon" class="disaster-icon">🌊</span>
+            <h3 id="disaster-type">FLOOD</h3>
+          </div>
+          <div class="mission-details-modal">
+            <div class="detail-row">
+              <span class="detail-label">People:</span
+              ><span id="people-trapped" class="detail-value">5</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Difficulty:</span
+              ><span id="severity-level" class="detail-value">3/10</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Reward:</span
+              ><span id="mission-reward" class="detail-value reward">+15</span>
+            </div>
+          </div>
+          <p class="mission-question">Attempt rescue?</p>
+        </div>
+        <div class="modal-actions">
+          <button id="accept-mission" class="btn-success">✅ RESCUE</button>
+          <button id="decline-mission" class="btn-danger">❌ SKIP</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="result-modal" class="modal">
+      <div class="modal-content">
+        <div id="result-header" class="modal-header">
+          <span id="result-icon" class="modal-icon">✅</span>
+          <h2 id="result-title">SUCCESS</h2>
+        </div>
+        <div class="modal-body">
+          <p id="result-message">Rescued!</p>
+          <div id="result-effects" class="result-effects"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="result-continue" class="btn-primary">CONTINUE</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="event-modal" class="modal">
+      <div class="modal-content event-content">
+        <div id="event-header" class="modal-header">
+          <span id="event-icon" class="modal-icon">⚡</span>
+          <h2>EVENT</h2>
+        </div>
+        <div class="modal-body">
+          <h3 id="event-name">Event</h3>
+          <p id="event-description">Description</p>
+          <div id="event-effects" class="event-effects"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="event-continue" class="btn-primary">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gameover-modal" class="modal">
+      <div class="modal-content gameover-content">
+        <div class="modal-header danger">
+          <span class="modal-icon">💥</span>
+          <h2>GAME OVER</h2>
+        </div>
+        <div class="modal-body">
+          <p id="gameover-reason">Crashed!</p>
+          <div class="final-stats">
+            <h3>Stats</h3>
+            <div class="stat-row">
+              <span>Pilot:</span><span id="final-pilot">Commander</span>
+            </div>
+            <div class="stat-row">
+              <span>Rescued:</span><span id="final-rescued">0</span>
+            </div>
+            <div class="stat-row">
+              <span>Trust:</span><span id="final-reputation">0</span>
+            </div>
+            <div class="stat-row">
+              <span>Missions:</span><span id="final-missions">0/6</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="restart-btn" class="btn-primary">🔄 RESTART</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="victory-modal" class="modal">
+      <div class="modal-content victory-content">
+        <div class="victory-animation"><span class="trophy">🏆</span></div>
+        <h2>YOU WIN!</h2>
+        <p class="victory-subtitle">All missions complete!</p>
+        <div class="final-stats">
+          <div class="stat-row">
+            <span>Pilot:</span><span id="victory-pilot">Commander</span>
+          </div>
+          <div class="stat-row">
+            <span>Rescued:</span><span id="victory-rescued">0</span>
+          </div>
+          <div class="stat-row">
+            <span>Trust:</span><span id="victory-reputation">0</span>
+          </div>
+          <div class="stat-row">
+            <span>Fuel Left:</span><span id="victory-fuel">0 km</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button id="victory-restart" class="btn-primary">
+            🔄 PLAY AGAIN
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="flying-overlay" class="flying-overlay">
+      <div class="flying-content">
+        <div class="flying-plane">✈️</div>
+        <h2>Flying...</h2>
+        <div class="flying-progress"><div class="flying-bar"></div></div>
+        <p id="flying-info">0 km</p>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
