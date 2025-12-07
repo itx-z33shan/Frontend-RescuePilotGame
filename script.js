@@ -139,7 +139,7 @@ let game = {
   over: false,
   currentMission: null,
 };
-let isRefueling = false; // Flag to prevent button flicker
+let isRefueling = false;
 
 // Utils
 const calcDist = function (a, b) {
@@ -179,7 +179,6 @@ var closeModal = function (id) {
   $(id).classList.remove("active");
 };
 
-// Scroll to element
 function scrollToGame() {
   setTimeout(function () {
     var dashboard = document.querySelector(".dashboard");
@@ -374,7 +373,7 @@ function startGame() {
   setTimeout(function () {
     initMap();
     updateUI();
-    scrollToGame(); // Auto scroll to game
+    scrollToGame();
   }, 100);
 }
 
@@ -415,7 +414,7 @@ function updateUI() {
   $("current-airport-name").textContent = game.current.name;
   $("current-airport-code").textContent = game.current.ident;
 
-  // Refuel button - only update if not currently refueling
+  // Refuel button
   if (!isRefueling) {
     var refuelBtn = $("refuel-btn");
     var canRefuel = game.rep >= CONFIG.refuelCost && game.fuel < CONFIG.maxFuel;
@@ -430,65 +429,6 @@ function updateUI() {
   }
 
   updateMap();
-  updateMissionsList();
-}
-
-function updateMissionsList() {
-  var list = $("missions-list");
-  var progressPct = (game.completed / CONFIG.missionsToWin) * 100;
-
-  list.innerHTML =
-    '<div class="missions-progress">' +
-    '<div class="progress-text">Complete <strong>' +
-    CONFIG.missionsToWin +
-    "</strong> to win " +
-    '<span class="progress-count">(' +
-    game.completed +
-    "/" +
-    CONFIG.missionsToWin +
-    ")</span></div>" +
-    '<div class="progress-bar-container"><div class="progress-bar" style="width:' +
-    progressPct +
-    '%"></div></div></div>';
-
-  var sorted = game.missions.slice().sort(function (a, b) {
-    var order = { pending: 0, completed: 1, failed: 2 };
-    return order[a.status] - order[b.status];
-  });
-
-  for (var i = 0; i < sorted.length; i++) {
-    var m = sorted[i];
-    var diff = m.severity <= 2 ? "Easy" : m.severity <= 3 ? "Medium" : "Hard";
-    var cls = m.severity <= 2 ? "easy" : m.severity <= 3 ? "medium" : "hard";
-    var badge =
-      m.status === "pending"
-        ? '<span class="difficulty-badge ' + cls + '">' + diff + "</span>"
-        : "";
-
-    list.innerHTML +=
-      '<div class="mission-item ' +
-      m.status +
-      '">' +
-      '<span class="mission-icon">' +
-      m.icon +
-      "</span>" +
-      '<div class="mission-details">' +
-      '<div class="mission-type">' +
-      m.disaster +
-      " - " +
-      m.peopleInDanger +
-      " people " +
-      badge +
-      "</div>" +
-      '<div class="mission-location">' +
-      m.airport.name +
-      "</div>" +
-      '<div class="mission-reward">+' +
-      m.reward +
-      " Trust</div>" +
-      "</div>" +
-      "</div>";
-  }
 }
 
 function fly(ident, dist) {
@@ -683,9 +623,7 @@ function handleResultContinue() {
   }
 }
 
-// FIXED REFUEL FUNCTION
 function refuel() {
-  // Check conditions
   if (game.rep < CONFIG.refuelCost) {
     alert("Not enough Trust Points! Need " + CONFIG.refuelCost);
     return;
@@ -695,16 +633,13 @@ function refuel() {
     return;
   }
 
-  // Set refueling flag
   isRefueling = true;
 
-  // Apply refuel
   var fuelBefore = game.fuel;
   game.fuel = Math.min(CONFIG.maxFuel, game.fuel + CONFIG.refuelGain);
   var fuelAdded = game.fuel - fuelBefore;
   game.rep -= CONFIG.refuelCost;
 
-  // Update displays immediately
   $("fuel-bar").style.width =
     Math.min(100, (game.fuel / CONFIG.maxFuel) * 100) + "%";
   $("fuel-value").textContent = game.fuel;
@@ -712,7 +647,6 @@ function refuel() {
   $("reputation-bar").style.width =
     Math.min(100, (game.rep / CONFIG.maxRep) * 100) + "%";
 
-  // Update fuel bar color
   var fuelBar = $("fuel-bar");
   if (game.fuel < 500) {
     fuelBar.style.background = "linear-gradient(90deg,#ef4444,#dc2626)";
@@ -723,18 +657,15 @@ function refuel() {
   }
   fuelBar.classList.remove("pulse-danger");
 
-  // Update button state
   var btn = $("refuel-btn");
   btn.textContent = "✅ +" + fuelAdded + "km Added!";
   btn.disabled = true;
 
-  // Update map to show new range
   updateMap();
 
-  // Reset button after delay
   setTimeout(function () {
     isRefueling = false;
-    updateUI(); // This will properly show/hide button based on conditions
+    updateUI();
   }, 1500);
 }
 
@@ -783,5 +714,4 @@ document.addEventListener("DOMContentLoaded", function () {
   $("victory-restart").addEventListener("click", restart);
 });
 
-// Global for map popup buttons
 window.fly = fly;
